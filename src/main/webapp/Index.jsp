@@ -1,0 +1,105 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%> 
+<%@ page import="java.sql.*" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Attendance</title>
+    <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/Index.css">
+    
+    <script>
+    function fetchAttendance() {
+        var department = document.getElementById("departmentSelect").value;
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "createTable.jsp", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                window.location.href = "Index.jsp?dept=" + xhr.responseText; 
+            }
+        };
+        xhr.send("dept=" + department);
+    }
+
+        function saveAttendance(registerNo, hourColumn, value, dept) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "saveAttendance.jsp", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    console.log("Attendance updated successfully!");
+                }
+            };
+            xhr.send("registerNo=" + registerNo + "&hourColumn=" + hourColumn + "&value=" + value + "&dept=" + dept);
+        }
+        function openReport(){
+        	window.location.href = "report.jsp";
+        }
+        
+    </script>
+</head>
+<body>
+    <h1 style="text-align: center;">ATTENDANCE</h1>
+    <div>
+        <select id="departmentSelect" class="chooseDepartment" onchange="fetchAttendance()">
+            <option selected disabled>Choose Department</option>
+            <option value="CSE_I">CSE - I</option>
+            <option value="CSE_II">CSE - II</option>
+            <option value="CSE_III">CSE - III</option>
+            <option value="IT_I">IT - I</option>
+            <option value="IT_II">IT - II</option>
+            <option value="IT_III">IT - III</option>
+          <!--    <option value="ECE_I">ECE - I</option>
+            <option value="ECE_II">ECE - II</option>
+            <option value="ECE_III">ECE - III</option>	-->
+        </select>
+    </div>
+
+    <% String dept = request.getParameter("dept"); %>
+
+    <div class="table_container">
+        <table border="1">
+            <tr>
+                <th>REGISTER NUMBER</th>
+                <th>1ST HOUR</th>
+                <th>2ND HOUR</th>
+                <th>3RD HOUR</th>
+                <th>4TH HOUR</th>
+                <th>5TH HOUR</th>
+            </tr>
+
+            <% 
+                if (dept != null && dept.matches("^[A-Za-z0-9_]+$")) { 
+                    try (Connection connect = DriverManager.getConnection("jdbc:mysql://localhost:3306/ATTENDANCE", "root", "Kumaranraja@22_02$");
+                         PreparedStatement preparedStatement = connect.prepareStatement("SELECT * FROM " + dept);
+                         ResultSet rs = preparedStatement.executeQuery()) {
+
+                        while (rs.next()) {
+                            String registerNo = rs.getString("REGISTER_NO");
+            %>
+            <tr>
+                <td><%= registerNo %></td>
+                <% for (int i = 1; i <= 5; i++) { %>
+                    <td>
+                        <input style="border: none;" type="text" name="hour<%= i %>_<%= registerNo %>" 
+                               value="<%= rs.getString("HOUR_" + i) %>" 
+                               onchange="saveAttendance('<%= registerNo %>', 'HOUR_<%= i %>', this.value, '<%= dept %>')">
+                    </td>
+                <% } %>
+            </tr>
+            <%
+                        }
+                    } catch (Exception e) {
+                        out.println("<tr><td colspan='6'>Error: " + e.getMessage() + "</td></tr>");
+                    }
+                }
+            %>
+        </table>
+   
+    </div>
+         <h1>NOTE : P -Present ,<br> A - Absent</h1>
+         
+        <button class="reportButton" onClick="openReport()" style="padding: 10px 20px; background-color: red;color:white; font-size: 20px;">report</button>
+
+</body>
+</html>

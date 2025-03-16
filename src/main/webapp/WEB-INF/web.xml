@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="https://jakarta.ee/xml/ns/jakartaee" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd" id="WebApp_ID" version="5.0">
+  <display-name>Attendance</display-name>
+ 
+    <welcome-file-list>
+    <welcome-file>Index.jsp</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+  </welcome-file-list>
+  <servlet>
+    <servlet-name>AttendanceServlet</servlet-name>
+    <servlet-class>com.Attendance.AttendanceServlet</servlet-class>
+  </servlet>
+
+	<servlet-mapping>
+	    <servlet-name>AttendanceServlet</servlet-name>
+	    <url-pattern>/attendance</url-pattern>
+	</servlet-mapping>
+</web-app>

@@ -15,11 +15,16 @@
 	    return;
 	}
 %>
-	<header style="background-color: #143D60; padding:15px">
-		<h1 style="text-align: center; color:white">NIRMALA COLLEGE FOR WOMEN</h1>
-		<h3 style="text-align: center; color:white">AUTONOMOUS INSTITUTION AFFILIATED TO BHARATHIAR UNIVERSITY</h3>
-		<h3 style="text-align: center; color:white">ACCREDITED WITH A++ GRADE BY NAAC IN THE 4TH CYCLE WITH CGPA 3.78</h3>
-		<h3 style="text-align: center; color:white">RED FIELDS, COIMBATORE - 641 018, TAMIL NADU, INDIA</h3>
+	<header style="background-color: #143D60; padding: 15px; display: flex; align-items: center; justify-content: center;">
+	    <div style="flex: 0 0 auto; margin-right: 20px;">
+	        <img src="images/logo.png" alt="logo" style="height: 150px;">
+	    </div>
+	    <div style="text-align: center; color: white;">
+	        <h1>NIRMALA COLLEGE FOR WOMEN</h1>
+	        <h3>AUTONOMOUS INSTITUTION AFFILIATED TO BHARATHIAR UNIVERSITY</h3>
+	        <h3>ACCREDITED WITH A++ GRADE BY NAAC IN THE 4TH CYCLE WITH CGPA 3.78</h3>
+	        <h3>RED FIELDS, COIMBATORE - 641 018, TAMIL NADU, INDIA</h3>
+	    </div>
 	</header>
     <h1 style="text-align: center; font-size:40px; color:green">Date-Wise Summary</h1>
 
@@ -59,87 +64,95 @@
     
     <div class="table_container">
         <table border="1" style="width: 80%; margin: auto; border-collapse: collapse;">
-            <tr style="background-color: #4CAF50; color: white;">
-                <th>DATE</th>
-                <th>REGISTER NUMBER</th>
-                <th>1ST HOUR</th>
-                <th>2ND HOUR</th>
-                <th>3RD HOUR</th>
-                <th>4TH HOUR</th>
-                <th>5TH HOUR</th>
-            </tr>
+    <tr style="background-color: #4CAF50; color: white;">
+        <th>DATE</th>
+        <th>REGISTER NUMBER</th>
+        <th>NAME</th>
+        <th>1ST HOUR</th>
+        <th>2ND HOUR</th>
+        <th>3RD HOUR</th>
+        <th>4TH HOUR</th>
+        <th>5TH HOUR</th>
+    </tr>
 
-            <% 
-                try {
-                    // Load MySQL driver
-                    Class.forName("com.mysql.cj.jdbc.Driver");
+    <% 
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection connect = DriverManager.getConnection("jdbc:mysql://localhost:3306/ATTENDANCE", "root", "Kumaranraja@22_02$");
 
-                    // Establish database connection
-                    Connection connect = DriverManager.getConnection("jdbc:mysql://localhost:3306/ATTENDANCE", "root", "Kumaranraja@22_02$");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd");
+            Calendar startDate = Calendar.getInstance();
+            Calendar endDate = Calendar.getInstance();
+            startDate.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(fromDate));
+            endDate.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(toDate));
 
-                    // Convert fromDate and toDate to Calendar objects
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd");
-                    Calendar startDate = Calendar.getInstance();
-                    Calendar endDate = Calendar.getInstance();
-                    startDate.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(fromDate));
-                    endDate.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(toDate));
+            StringBuilder queryBuilder = new StringBuilder();
+            boolean first = true;
 
-                    // Generate UNION query for multiple dates
-                    StringBuilder queryBuilder = new StringBuilder();
-                    boolean first = true;
+            while (!startDate.after(endDate)) {
+                String dateStr = sdf.format(startDate.getTime());
+                String tableName = dept + "_" + dateStr;
 
-                    while (!startDate.after(endDate)) {
-                        String dateStr = sdf.format(startDate.getTime());
-                        String tableName = dept + "_" + dateStr;
+                // Check if the table exists
+                String checkTableQuery = "SHOW TABLES LIKE '" + tableName + "'";
+                Statement checkStmt = connect.createStatement();
+                ResultSet checkRs = checkStmt.executeQuery(checkTableQuery);
 
-                        if (!first) {
-                            queryBuilder.append(" UNION ALL ");
-                        }
-                        queryBuilder.append("SELECT '" + dateStr + "' AS ATTENDANCE_DATE, REGISTER_NO, HOUR_1, HOUR_2, HOUR_3, HOUR_4, HOUR_5 FROM " + tableName);
-
-                        first = false;
-                        startDate.add(Calendar.DATE, 1); // Move to next day
+                if (checkRs.next()) { // Table exists
+                    if (!first) {
+                        queryBuilder.append(" UNION ALL ");
                     }
-
-                    if (first) {
-                        out.println("<tr><td colspan='7' style='text-align:center; color:red;'>No records found for the selected date range.</td></tr>");
-                    } else {
-                        queryBuilder.append(" ORDER BY ATTENDANCE_DATE");
-                        String query = queryBuilder.toString();
-
-                        Statement stmt = connect.createStatement();
-                        ResultSet rs = stmt.executeQuery(query);
-
-                        boolean dataExists = false;
-
-                        while (rs.next()) { 
-                            dataExists = true;
-            %>
-            <tr>
-                <td><%= rs.getString("ATTENDANCE_DATE") %></td>
-                <td><%= rs.getString("REGISTER_NO") %></td>
-                <% for (int i = 1; i <= 5; i++) { %>
-                    <td><%= rs.getString("HOUR_" + i) %></td>
-                <% } %>
-            </tr>
-            <% 
-                        }
-
-                        if (!dataExists) {
-                            out.println("<tr><td colspan='7' style='text-align:center; color:red;'>No records found for the selected date range.</td></tr>");
-                        }
-
-                        // Close resources
-                        rs.close();
-                        stmt.close();
-                    }
-
-                    connect.close();
-                } catch (Exception e) {
-                    out.println("<tr><td colspan='7' style='text-align:center; color:red;'>Error: " + e.getMessage() + "</td></tr>");
+                    queryBuilder.append("SELECT '" + dateStr + "' AS ATTENDANCE_DATE, REGISTER_NO, NAME, HOUR_1, HOUR_2, HOUR_3, HOUR_4, HOUR_5 FROM " + tableName);
+                    first = false;
                 }
-            %>
-        </table>
+
+                checkRs.close();
+                checkStmt.close();
+
+                startDate.add(Calendar.DATE, 1);
+            }
+
+
+            if (first) {
+                out.println("<tr><td colspan='8' style='text-align:center; color:red;'>No records found for the selected date range.</td></tr>");
+            } else {
+                queryBuilder.append(" ORDER BY ATTENDANCE_DATE");
+                String query = queryBuilder.toString();
+
+                Statement stmt = connect.createStatement();
+                ResultSet rs = stmt.executeQuery(query);
+
+                boolean dataExists = false;
+
+                while (rs.next()) { 
+                    dataExists = true;
+    %>
+    <tr>
+        <td><%= rs.getString("ATTENDANCE_DATE") %></td>
+        <td><%= rs.getString("REGISTER_NO") %></td>
+        <td><%= rs.getString("NAME") %></td>
+        <% for (int i = 1; i <= 5; i++) { %>
+            <td><%= rs.getString("HOUR_" + i) %></td>
+        <% } %>
+    </tr>
+    <% 
+                }
+
+                if (!dataExists) {
+                    out.println("<tr><td colspan='8' style='text-align:center; color:red;'>No records found for the selected date range.</td></tr>");
+                }
+
+                rs.close();
+                stmt.close();
+            }
+
+            connect.close();
+        } catch (Exception e) {
+            out.println("<tr><td colspan='8' style='text-align:center; color:red;'>Error: " + e.getMessage() + "</td></tr>");
+        }
+    %>
+</table>
+
     </div>
     
     <% } %>

@@ -4,9 +4,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title >Attendance</title>
+    <title>Attendance</title>
     <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/Index.css">
-    
     <script>
 	    function fetchAttendance() {
 	        var department = document.getElementById("departmentSelect").value;
@@ -47,12 +46,19 @@
 	    return;
 	}
 %>
-	<header style="background-color: #143D60; padding:15px">
-		<h1 style="text-align: center; color:white">NIRMALA COLLEGE FOR WOMEN</h1>
-		<h3 style="text-align: center; color:white">AUTONOMOUS INSTITUTION AFFILIATED TO BHARATHIAR UNIVERSITY</h3>
-		<h3 style="text-align: center; color:white">ACCREDITED WITH A++ GRADE BY NAAC IN THE 4TH CYCLE WITH CGPA 3.78</h3>
-		<h3 style="text-align: center; color:white">RED FIELDS, COIMBATORE - 641 018, TAMIL NADU, INDIA</h3>
+	
+	<header style="background-color: #143D60; padding: 15px; display: flex; align-items: center; justify-content: center;">
+	    <div style="flex: 0 0 auto; margin-right: 20px;">
+	        <img src="images/logo.png" alt="logo" style="height: 150px;">
+	    </div>
+	    <div style="text-align: center; color: white;">
+	        <h1>NIRMALA COLLEGE FOR WOMEN</h1>
+	        <h3>AUTONOMOUS INSTITUTION AFFILIATED TO BHARATHIAR UNIVERSITY</h3>
+	        <h3>ACCREDITED WITH A++ GRADE BY NAAC IN THE 4TH CYCLE WITH CGPA 3.78</h3>
+	        <h3>RED FIELDS, COIMBATORE - 641 018, TAMIL NADU, INDIA</h3>
+	    </div>
 	</header>
+
      <div style="margin-top: 15px">
         <select id="departmentSelect" class="chooseDepartment" onchange="fetchAttendance()">
             <option selected disabled>Choose Department</option>
@@ -71,6 +77,7 @@
         <table border="1">
             <tr>
                 <th>REGISTER NUMBER</th>
+                <th>NAME</th>
                 <th>1ST HOUR</th>
                 <th>2ND HOUR</th>
                 <th>3RD HOUR</th>
@@ -88,9 +95,11 @@
                 	    ResultSet rs = preparedStatement.executeQuery();
                         while (rs.next()) {
                             String registerNo = rs.getString("REGISTER_NO");
+                            String name = rs.getString("NAME"); // Fetching Name from DB
             %>
             <tr>
                 <td><%= registerNo %></td>
+                <td><%= name %></td> <!-- Displaying Name -->
                 <% for (int i = 1; i <= 5; i++) { %>
                     <td>
                         <input style="border: none;" type="text" name="hour<%= i %>_<%= registerNo %>" 
@@ -102,7 +111,7 @@
             <%
                         }
                     } catch (Exception e) {
-                        out.println("<tr><td colspan='6'>Error: " + e.getMessage() + "</td></tr>");
+                        out.println("<tr><td colspan='7'>Error: " + e.getMessage() + "</td></tr>");
                     }
                 }
             %>
